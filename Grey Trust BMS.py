@@ -17,7 +17,7 @@ connection = pymysql.connect(
 # CREATE DATABASE greytrust;
 # CREATE TABLE customer_info ( id INT(10) AUTO_INCREMENT NOT NULL PRIMARY KEY, fullname VARCHAR(32) NOT NULL, gender VARCHAR(15) NOT NULL, residence VARCHAR(255) NOT NULL, dob VARCHAR(25) NOT NULL, pin VARCHAR(8) NOT NULL)
 # CREATE TABLE transaction_info ( id INT(10) AUTO_INCREMENT NOT NULL PRIMARY KEY, cust_id INT(10), FOREIGN KEY transaction_info(cust_id) REFERENCES account_info(cust_id), type VARCHAR(6) NOT NULL, amount FLOAT(15, 2) NOT NULL, status VARCHAR(10) NOT NULL, datestamp DATETIME NOT NULL);
-# CREATE TABLE account_info (id INT(10) AUTO_INCREMENT NOT NULL PRIMARY KEY, cust_id INT(10), FOREIGN KEY account_info(cust_id) REFERENCES customer_info(id), acc_number INT(10) NOT NULL, acc_balance FLOAT(15, 2) NOT NULL, acc_pin VARCHAR(8) NOT NULl )
+# CREATE TABLE account_info (id INT(10) AUTO_INCREMENT NOT NULL PRIMARY KEY, cust_id INT(10), FOREIGN KEY account_info(cust_id) REFERENCES customer_info(id), acc_number VARCHAR(10) NOT NULL, acc_balance FLOAT(15, 2) NOT NULL, acc_pin VARCHAR(8) NOT NULl )
 
 
 
@@ -32,7 +32,7 @@ class GreyTrustBank():
         self.residence = residence
         self.dob = dob
         self.pin = pin
-        self.account_num = rd.randrange(0000000000, 9999999999)
+        self.account_num = rd.randrange(1000000000, 9999999999)
         self.account_bal = 0 
 
     #- accessing class attributes
@@ -83,7 +83,7 @@ def depAMT():
     with connection.cursor() as cursor:
         # getting amount and account number
         amount = int(input("Enter Deposit Amount: "))
-        acc_num = int(input("Enter Account No: "))
+        acc_num = input("Enter Account No: ")
 
         # requesting account balance from database
         data = (acc_num,)
@@ -124,7 +124,7 @@ def widAMT():
     with connection.cursor() as cursor:
   # getting amount and account number
         amount = int(input("Enter Withdrawal Amount: "))
-        acc_num = int(input("Enter Account No: "))
+        acc_num = input("Enter Account No: ")
 
         # requesting account balance from database
         data = (acc_num,)
@@ -185,7 +185,7 @@ def widAMT():
 def balENQ():
     with connection.cursor() as cursor:
         # getting account number
-        a_num = int(input("Enter Account No: "))
+        a_num = input("Enter Account No: ")
         a_pin = input("Enter PIN: ")
 
         # retrieving balance from database
@@ -201,27 +201,26 @@ def balENQ():
 
 #*** Menu 
 def menu_gtb():
-    while True:
-        print("""
-            ** HELLO, Goodday to you **
-            > ENTER 1 to Make a Deposit
-            > ENTER 2 to Withdraw an amount
-            > ENTER 3 to Check Account Balance
-            > ENTER 0 to Logout!
-        """)
-        option = input("Enter option: ")
+    print("""
+        ** HELLO, Goodday to you **
+        > ENTER 1 to Make a Deposit
+        > ENTER 2 to Withdraw an amount
+        > ENTER 3 to Check Account Balance
+        > ENTER 0 to Logout!
+    """)
+    option = input("Enter option: ")
 
-        if option == '1':
-            depAMT()
-        elif option == '2':
-            widAMT()
-        elif option == '3':
-            balENQ()
-        elif option == '0':
-            print("Thank you for banking with us!")
-            break
-        else:
-            print("INVALID option entered.")
+    if option == '1':
+        depAMT()
+    elif option == '2':
+        widAMT()
+    elif option == '3':
+        balENQ()
+    elif option == '0':
+        print("Thank you for banking with us!")
+        pass
+    else:
+        print("INVALID option entered.")
 
 
 
@@ -267,27 +266,35 @@ def openAcc():
         name = input("Enter name: ")
         pin = input("Enter account pin, maxlength of 8 characters: ")
 
-        # fetching customer_info and generating account number
+        # fetching customer info and generating account number
         data = (name, pin)
         query = ("SELECT * FROM customer_info WHERE fullname = %s AND pin = %s");
         cursor.execute(query, data)
         result = cursor.fetchone()
-
-        # init bank object
         res = list(result.values())
-        fk = res[0]
+
+            # init bank object
         customer = GreyTrustBank(res[1], res[2], res[3], res[4], res[5])
         a_num, a_balance, a_pin = customer.get_accountNo, customer.account_bal, customer.get_pin;
 
-        # adding to database
+            # adding to database
+        fk = res[0]
         data2 = (fk, a_num, a_balance, a_pin)
         query2 = ("INSERT INTO account_info(cust_id, acc_number, acc_balance, acc_pin) VALUES (%s, %s, %s, %s)");
         cursor.execute(query2, data2)
         connection.commit()
 
+            # fetching and printing login details from account_table
+        data3 = (fk, a_pin)
+        query3 = ("SELECT * FROM account_info WHERE cust_id = %s AND acc_pin = %s");
+        cursor.execute(query3, data3)
+        result3 = cursor.fetchone()
+        res3 = list(result3.values())
+
         print(f"""
             Data Entered Successfully! 
-            Account Number: {a_num}, Account Pin: {a_pin}
+            Your LOGIN DETAILS
+            Account Number: {res3[2]}, Account Pin: {res3[4]}
             PLEASE SAVE credentials for future use!
         """)
         main_gtb()
@@ -297,7 +304,7 @@ def openAcc():
 def loginAcc():
     with connection.cursor() as cursor:
         print("Please ENTER LOGIN details")
-        num = int(input("Account Number: "))
+        num = input("Account Number: ")
         pin = input("Account PIN: ")
 
         # fetching account info from account_info table
@@ -319,27 +326,26 @@ def loginAcc():
 
 #*** MAIN
 def main_gtb():
-    while True:
-        print("""
-            *** WELCOME TO GREY TRUST BANK ***
-            > ENTER 1 to REGISTER a new Account
-            > ENTER 2 to OPEN Account
-            > ENTER 3 to LOGIN your Account
-            > ENTER 0 to exit
-        """)
-        option = input("Enter option: ")
+    print("""
+        *** WELCOME TO GREY TRUST BANK ***
+        > ENTER 1 to REGISTER a new Account
+        > ENTER 2 to OPEN Account
+        > ENTER 3 to LOGIN your Account
+        > ENTER 0 to exit
+    """)
+    option = input("Enter option: ")
 
-        if option == '1':
-            regAcc()
-        elif option == '2':
-            openAcc()
-        elif option == '3':
-            loginAcc()
-        elif option == '0':
-            print("Have a nice day")
-            break
-        else:
-            print("INVALID option entered.")
+    if option == '1':
+        regAcc()
+    elif option == '2':
+        openAcc()
+    elif option == '3':
+        loginAcc()
+    elif option == '0':
+        print("Have a nice day")
+        pass
+    else:
+        print("INVALID option entered.")
 
 
 #*** run program

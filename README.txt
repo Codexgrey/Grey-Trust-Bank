@@ -11,14 +11,14 @@ program = {
                     LINE 184 - balance enquiry
 
     LINE 202    - Menu
-    LINE 228    - Functions In Main
-                    LINE 229 - register new account
-                    LINE 258 - open registered account
-                    LINE 296 - login to existing account
+    LINE 227    - Functions In Main
+                    LINE 228 - register new account
+                    LINE 257 - open registered account
+                    LINE 303 - login to existing account
 
-    LINE 320    - Main
+    LINE 327    - Main
 }
 
-LINE 345    - Run Program
+LINE 352    - Run Program
 
 ---------------------------------------------------------- ENJOY!
