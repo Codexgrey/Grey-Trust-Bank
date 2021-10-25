@@ -238,7 +238,7 @@ def regAcc():
         gender = input("Enter gender: ")
         residence = input("Enter address: ")
         dob = input("Enter date of birth: ")
-        pin = input("Enter account pin, maxlength of 8 characters: ")
+        pin = input("Choose account pin, EIGHT(8) characters MAX: ")
 
         # creating customer instance with info
         customer = GreyTrustBank(name, gender, residence, dob, pin)
@@ -263,8 +263,8 @@ def openAcc():
         """)
 
         # collecting details
-        name = input("Enter name: ")
-        pin = input("Enter account pin, maxlength of 8 characters: ")
+        name = input("Enter Registered Name: ")
+        pin = input("Enter Pin: ")
 
         # fetching customer info and generating account number
         data = (name, pin)
