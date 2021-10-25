@@ -24,7 +24,7 @@ class GreyTrustBank():
         self.gender = gender
         self.residence = residence
         self.dob = dob
-        self.pin = int(pin)
+        self.pin = pin
         self.account_num = rd.randrange(0000000000, 9999999999)
         self.account_bal = 0 
 
@@ -94,7 +94,7 @@ def depAMT():
         trans_status = "Successful"
         trans_date = dt.now()
         data2 = (fk, trans_type, amount, trans_status, trans_date)
-        query2 = ("INSERT INTO transaction_info VALUES (%s, %s, %s, %s, %s)");
+        query2 = ("INSERT INTO transaction_info(cust_id, type, amount, status, datestamp) VALUES (%s, %s, %s, %s, %s)");
         cursor.execute(query2, data2)
         connection.commit()
 
@@ -103,10 +103,8 @@ def depAMT():
         query3 = "SELECT acc_balance FROM account_info WHERE acc_number = %s";
         cursor.execute(query3, data3)
         balance = cursor.fetchone()
-
         print(f"Transaction Successful! Account Balance: {balance}")
         menu_gtb()
-
 
 
 #--- withdrawing an amount
@@ -136,7 +134,7 @@ def widAMT():
             trans_status = "Successful"
             trans_date = dt.now()
             data2 = (fk, trans_type, amount, trans_status, trans_date)
-            query2 = ("INSERT INTO transaction_info VALUES (%s, %s, %s, %s, %s)");
+            query2 = ("INSERT INTO transaction_info(cust_id, type, amount, status, datestamp) VALUES (%s, %s, %s, %s, %s)");
             cursor.execute(query2, data2)
             connection.commit()
 
@@ -145,7 +143,6 @@ def widAMT():
             query3 = "SELECT acc_balance FROM account_info WHERE acc_number = %s";
             cursor.execute(query3, data3)
             balance = cursor.fetchone()
-
             print(f"Transaction Successful! Account Balance: {balance}")
             menu_gtb()
         
@@ -156,7 +153,7 @@ def widAMT():
             trans_status = "Failed"
             trans_date = dt.now()
             data2 = (fk, trans_type, amount, trans_status, trans_date)
-            query2 = ("INSERT INTO transaction_info VALUES (%s, %s, %s, %s, %s)");
+            query2 = ("INSERT INTO transaction_info(cust_id, type, amount, status, datestamp) VALUES (%s, %s, %s, %s, %s)");
             cursor.execute(query2, data2)
             connection.commit()
 
@@ -165,10 +162,8 @@ def widAMT():
             query3 = "SELECT acc_balance FROM account_info WHERE acc_number = %s";
             cursor.execute(query3, data3)
             balance = cursor.fetchone()
-
             print(f"Transaction Failed! Account Balance: {balance}")
             menu_gtb()
-
 
 
 #--- balance enquiry
@@ -227,22 +222,49 @@ def regAcc():
         gender = input("Enter gender: ")
         residence = input("Enter address: ")
         dob = input("Enter date of birth: ")
-        pin = input("Enter account pin, 5 digits max: ")
+        pin = input("Enter account pin, maxlength of 8 characters: ")
 
         # creating customer instance with info
         customer = GreyTrustBank(name, gender, residence, dob, pin)
-        n, gd, r, db = customer.get_name, customer.get_gender, customer.get_residence, customer.get_dob;
-        a_num, a_balance, a_pin = customer.account_num, customer.account_bal, customer.get_pin;
+        n, gd, r, db, p = customer.get_name, customer.get_gender, customer.get_residence, customer.get_dob, customer.get_pin;
 
         # adding to database and calling the main function afterwards
-        data1 = (n, gd, r, db)
-        query1 = ("INSERT INTO customer_info VALUES (%s, %s, %s, %s)");
+        data1 = (n, gd, r, db, p)
+        query1 = ("INSERT INTO customer_info(fullname, gender, residence, dob, pin) VALUES (%s, %s, %s, %s, %s)");
         cursor.execute(query1, data1)
         connection.commit()
 
-        fk = f"SELECT id FROM customer_info WHERE fullname = {n}"
+        print("Data Entered Successfully!")
+        main_gtb()
+
+
+ 
+#--- open account
+def openAcc():
+    with connection.cursor() as cursor:
+        # requesting customer details
+        print("""
+            *** PLease confirm the following registration details...
+        """)
+
+        # collecting details
+        name = input("Enter name: ")
+        pin = input("Enter account pin, maxlength of 8 characters: ")
+
+        # fetching customer_info and generating account number
+        data = (name, pin)
+        query = ("SELECT * FROM customer_info WHERE fullname = %s AND pin = %s");
+        cursor.execute(query, data)
+        result = cursor.fetchone()
+
+        # init bank object
+        customer = GreyTrustBank(result[1], result[2], result[3], result[4], result[5])
+        a_num, a_balance, a_pin = customer.account_num, customer.account_bal, customer.get_pin;
+
+        # inserting into account_info table
+        fk = f"SELECT id FROM customer_info WHERE fullname = {result[1]} AND pin = {result[5]}"
         data2 = (fk, a_num, a_balance, a_pin)
-        query2 = ("INSERT INTO account_info VALUES (%s, %s, %s, %s)");
+        query2 = ("INSERT INTO account_info(cust_id, acc_number, acc_balance, acc_pin) VALUES (%s, %s, %s, %s)");
         cursor.execute(query2, data2)
         connection.commit()
 
@@ -252,7 +274,8 @@ def regAcc():
         """)
         main_gtb()
 
- 
+
+
 #--- login to existing account
 def loginAcc():
     with connection.cursor() as cursor:
@@ -273,62 +296,25 @@ def loginAcc():
             menu_gtb()
 
 
-#! admin session
-def admin_sesh():
-    print("""
-        > 1. Register new account
-        > 2. Login existing account
-        > 3. Delete existing account
-        > 4. Logout
-    """)
-    option = str(input("Option: "))
-
-    if option == '1':
-        regAcc()
-    elif option == '2':
-        loginAcc()
-    elif option == '3':
-        print("delAcc function here...")
-    elif option == '4':
-        print("Exiting...")
-        pass
-    else:
-        print("INVALID option!")
-
-
-#! admin login
-def auth_admin():
-    print("""ADMIN LOGIN""")
-    username = input("Username: ")
-    password = input("Password: ")
-
-    if username == "collins":
-        if password == "reverent":
-            admin_sesh()
-        else:
-            print("INCORRECT Password!")
-    else:
-        print("LOGIN not recognised")
-
 
 #*** main function
 def main_gtb():
     while True:
         print("""
             *** WELCOME TO GREY TRUST BANK ***
-            > ENTER 1 to LOGIN your Account
-            > ENTER 2 to REGISTER a new Account
-            > LOGIN as ADMIN
+            > ENTER 1 to REGISTER a new Account
+            > ENTER 2 to OPEN Account
+            > ENTER 3 to LOGIN your Account
             > ENTER 0 to exit
         """)
         option = str(input("Enter option: "))
 
         if option == '1':
-            loginAcc()
-        elif option == '2':
             regAcc()
-        elif option == '37':
-            auth_admin()
+        elif option == '2':
+            openAcc()
+        elif option == '3':
+            loginAcc()
         elif option == '0':
             print("Have a nice day")
             break
@@ -351,6 +337,105 @@ main_gtb()
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# ? admin session
+# def admin_sesh():
+#     print("""
+#         > 1. Register new account
+#         > 2. Login existing account
+#         > 3. Delete existing account
+#         > 4. Logout
+#     """)
+#     option = str(input("Option: "))
+
+#     if option == '1':
+#         regAcc()
+#     elif option == '2':
+#         loginAcc()
+#     elif option == '3':
+#         print("delAcc function here...")
+#     elif option == '4':
+#         print("Exiting...")
+#         pass
+#     else:
+#         print("INVALID option!")
+
+
+# ? admin login
+# def auth_admin():
+#     print("""ADMIN LOGIN""")
+#     username = input("Username: ")
+#     password = input("Password: ")
+
+#     if username == "collins":
+#         if password == "reverent":
+#             admin_sesh()
+#         else:
+#             print("INCORRECT Password!")
+#     else:
+#         print("LOGIN not recognised")
+#
+#
+#
+# def regAcc():
+#     with connection.cursor() as cursor:
+#         print("""
+#             *** Thank you for choosing Grey Trust Bank!
+#             > To register an account, please provide the following information...
+#         """)
+
+#         # collecting customer info
+#         name = input("Enter name: ")
+#         gender = input("Enter gender: ")
+#         residence = input("Enter address: ")
+#         dob = input("Enter date of birth: ")
+#         pin = input("Enter account pin, 5 digits max: ")
+
+#         # creating customer instance with info
+#         customer = GreyTrustBank(name, gender, residence, dob, pin)
+#         n, gd, r, db = customer.get_name, customer.get_gender, customer.get_residence, customer.get_dob;
+#         a_num, a_balance, a_pin = customer.account_num, customer.account_bal, customer.get_pin;
+
+#         # adding to database and calling the main function afterwards
+#         data1 = (n, gd, r, db)
+#         query1 = ("INSERT INTO customer_info(fullname, gender, residence, dob) VALUES (%s, %s, %s, %s)");
+#         cursor.execute(query1, data1)
+#         connection.commit()
+
+#         fk = f"SELECT id FROM customer_info WHERE fullname = {n}"
+#         data2 = (fk, a_num, a_balance, a_pin)
+#         query2 = ("INSERT INTO account_info(cust_id, acc_number, acc_balance, acc_pin) VALUES (%s, %s, %s, %s)");
+#         cursor.execute(query2, data2)
+#         connection.commit()
+
+#         print(f"""
+#             Data Entered Successfully! Account Number: {a_num}, Account Pin: {a_pin}
+#             GUARD THIS INFORMATION JEALOUSLY!
+#         """)
+#         main_gtb()
 
 
 
