@@ -66,6 +66,7 @@ class GreyTrustBank():
 
 
 
+
 #--- NOTE: functions in menu_gtb()
 #--- making a deposit
 def depAMT():
@@ -107,6 +108,7 @@ def depAMT():
         menu_gtb()
 
 
+
 #--- withdrawing an amount
 def widAMT():
     with connection.cursor as cursor:
@@ -121,7 +123,7 @@ def widAMT():
         result = cursor.fetchone()
 
         # updating account balance
-        if result > amount:
+        if result[0] > amount:
             a_bal = result[0] - amount
             data1 = (a_bal, a_num)
             query1 = ("UPDATE account_info SET acc_balance = %s WHERE acc_number = %s");
@@ -167,6 +169,21 @@ def widAMT():
             print(f"Transaction Failed! Account Balance: {balance}")
             menu_gtb()
 
+
+
+#--- balance enquiry
+def balENQ():
+    with connection.cursor() as cursor:
+        # getting account number
+        a_num = int(input("Enter Account No: "))
+
+        # retrieving balance from database
+        data = (a_num,)
+        query = ("SELECT * FROM account_info WHERE acc_number = %s")
+        cursor.execute(query, data)
+        result = cursor.fetchone()
+        print(f"Account Balance for {a_num} is {result[-2]}")
+        menu_gtb()
 
 
 
@@ -229,7 +246,10 @@ def regAcc():
         cursor.execute(query2, data2)
         connection.commit()
 
-        print("Data Entered Successfully!")
+        print(f"""
+            Data Entered Successfully! Account Number: {a_num}, Account Pin: {a_pin}
+            GUARD THIS INFORMATION JEALOUSLY!
+        """)
         main_gtb()
 
  
@@ -348,46 +368,4 @@ main_gtb()
 
 
 
-#-------------------------
-# def create_table():
-#     with connection.cursor() as cursor:
-#         add_table = """
-#             CREATE TABLE IF NOT EXISTS e_data(      
-#                 id INT(10) AUTO_INCREMENT NOT NULL PRIMARY KEY,
-#                 name VARCHAR(20),
-#                 sales BIGINT(15),
-#                 `date` DATE
-#             );     
-#         """;
-#         cursor.execute(add_table)
-#         connection.commit()
-        
-# # "if not exists" helps to check if a table with that name doesn't already exist
-# # create_table() is a static function, as it holds no args
 
-
-# def write_data(curr_name, curr_amount, curr_date):
-#     with connection.cursor() as cursor:
-#         add_record = f"""
-#             INSERT INTO e_data (name, sales, `date`)
-#             VALUES ('{curr_name}', {curr_amount}, '{curr_date}');
-#         """;
-#         cursor.execute(add_record)
-#         connection.commit()
-
-
-# def just_queries():
-#     with connection.cursor() as cursor:
-#         my_query = """
-#             SELECT name, SUM(sales) AS "total sales" FROM e_data GROUP BY name ORDER BY SUM(sales) DESC
-#             LIMIT 10;
-#         """
-#         cursor.execute(my_query)
-#         connection.commit()
-#         return cursor.fetchall()
-
-
-# #- calling create table NOTE: after creating migrations and called migrant function
-# create_table()
-# output = just_queries()
-# print(output)
