@@ -1,6 +1,6 @@
 ### PROJECT STRUCTURE
 >>> I used XAMPP control panel to build the database for this project
-
+>>  PLEASE install "Better Comment" extension on your VS Code, so you can see the highlighted comments
 
 program = { 
     LINE 2      - Database Setup including MySQL commands
@@ -21,4 +21,4 @@ program = {
 
 LINE 345    - Run Program
 
-ENJOY!!!!!!!
+---------------------------------------------------------- ENJOY!
