@@ -6,6 +6,9 @@ __pycache__/
 # C extensions
 *.so
 
+# folders
+ofdami
+
 # Distribution / packaging
 .Python
 build/

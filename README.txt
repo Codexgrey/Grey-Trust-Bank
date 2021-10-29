@@ -3,7 +3,7 @@
 >>  PLEASE install "Better Comment" extension on your VS Code, so you can see the highlighted comments
 
 program = { 
-    LINE 2      - Database Setup including MySQL commands
+    LINE 2      - Database Setup including mySQL tables created and their constraint commands
     LINE 24     - Bank Object 
     LINE 80     - Functions In Menu
                     LINE 81  - making a deposit
