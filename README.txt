@@ -10,7 +10,7 @@ program = {
                     LINE 122 - withdrawing an amount
                     LINE 184 - balance enquiry
 
-    LINE 202    - Menu
+    LINE 202    - Menu 
     LINE 227    - Functions In Main
                     LINE 228 - register new account
                     LINE 257 - open registered account
